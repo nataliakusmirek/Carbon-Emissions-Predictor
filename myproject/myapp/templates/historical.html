@@ -1,0 +1,14 @@
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+
+    <img src="{% static 'images/total_parent.png' %}" style="height: 350px" alt="Historical Emissions Chart by Parent">
+    <br>
+    <br>
+    <img src="{% static 'images/total_example.png' %}" style="height: 350px" alt="Historical Emissions Chart Example">
+    <br>
+    <br>
+    <img src="{% static 'images/total_commodity.png' %}" style="height: 350px" alt="Historical Emissions Chart by Commodity">
+
+{% endblock %}

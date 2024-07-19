@@ -1,0 +1,29 @@
+<!-- myapp/templates/index.html -->
+{% load static %}
+
+
+{% block content %}
+<title>Carbon Emissions Predictor</title>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <h1>Carbon Emissions Predictor</h1>
+    <h6 style="text-align: center; margin-top: -20px;">Made by <a href="https://github.com/nataliakusmirek" target="_blank" style="color: #7bdddd; text-decoration: none;">Talia Kusmirek</a></h6>
+    <br>
+    <nav class="navbar">
+        <ul style="height: 40px;">
+            <ul>
+                <li style="margin-right: 40px;"><a href="{% url 'home' %}" style="color: white"><img src="{% static 'images/home.png' %}" style='width: 95%; height: 80%;' alt="Home"></a></li>
+                <li><a href="{% url 'predict' %}" style="color: white"><img src="{% static 'images/ai.png' %}" style='width: 90%; height: 80%;' alt="Predict"></a></li>
+            </ul>
+    </nav>
+</body>
+
+</html>
+
+{% endblock %}

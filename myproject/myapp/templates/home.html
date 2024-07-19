@@ -1,0 +1,45 @@
+{% load static %}
+
+
+{% block content %}
+<title>Carbon Emissions Predictor</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+    {% include 'index.html' %}
+
+<div class="homepage_row">
+    <div style="text-align: center; margin-top: 50px;">
+        <h3 style="margin-bottom: 10px;">About This Project</h3>
+            <p style="font-size: 15px;">This project aims to provide accurate predictions of carbon emissions based on historical data and user inputs.</p>
+            <br>
+            <p style="margin-top: -30px; font-size: 15px;">The model uses machine learning techniques such as:</p>
+            <br>
+            <ul style="list-style-type: disc; font-size: 12px;"></ul>
+                <li>Neural Networks</li>
+                <li>One-Hot Encoding</li>
+                <li>Optimization</li>
+            </ul>
+        <br>
+        <img src="{% static 'images/model.png' %}" style="height: 350px">
+
+    </div>
+
+    <div style='text-align: center; margin-top: 90px;'>
+        <h4>Historical Data</h4>
+        <h6 style="margin-top: -5px; margin-bottom: 20px;">Visualized using Matplotlib</h6>
+
+        <div>
+            {% include 'historical.html' %}
+        </div>
+        <br>
+    </div>
+</div>
+
+<footer>
+    <section style = 'text-align: center; margin-top: 70px;'>
+        <h5>Contact</h5>
+        <p style='font-size: 10px;'><a href="mailto:kusmire@bc.edu" style="color: inherit; text-decoration: none;">If you have any questions or need support, please contact me at kusmire@bc.edu.</a></p>
+        <a href="https://www.flaticon.com/free-icons/home" title="home icons" style="color: inherit; font-size: 8px; text-decoration: none;">Home icons created by Freepik - Flaticon</a>
+    </section>
+</footer>
+
+{% endblock %}
