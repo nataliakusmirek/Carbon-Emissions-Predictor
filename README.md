@@ -89,6 +89,21 @@ To run this project locally, follow these steps:
 5. **Access the application**:
    Open your web browser and navigate to `http://localhost:8000`.
 
+## Screenshots
+Here are some screenshots of the Django web application in action:
+
+### Home Page
+
+![Home Page](https://github.com/nataliakusmirek/carbon-emissions-prediction/raw/main/homepage.png)
+This is the home page of the application where you can input the year for which you want to predict carbon emissions.
+
+#### Prediction Page
+
+![Prediction Page](https://github.com/yourusername/carbon-emissions-prediction/raw/main/predictpage.png)
+This page displays the predicted emissions along with a comparison plot of actual vs. predicted values and the evaluation metrics.
+
+
+
 ## Usage
 
 1. **Input Year**: Enter the year for which you want to predict carbon emissions.
