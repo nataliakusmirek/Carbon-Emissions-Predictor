@@ -3,7 +3,7 @@ import numpy as np
 import io
 import os
 import base64
-from flask import Flask, request, render_template
+from flask import Flask, render_template
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('Agg')
@@ -26,7 +26,6 @@ features = ['year', 'parent_entity', 'parent_type', 'commodity',
             'venting_emissions_MtCO2', 'total_operational_emissions_MtCO2e']
 target = 'total_emissions_MtCO2e'
 
-# Define numeric and categorical features
 numeric_features = ['product_emissions_MtCO2', 'flaring_emissions_MtCO2',
                      'venting_emissions_MtCO2', 'total_operational_emissions_MtCO2e']
 categorical_features = ['year', 'parent_entity', 'parent_type', 'commodity']
@@ -52,19 +51,32 @@ preprocessor = ColumnTransformer(
         ('cat', categorical_transformer, categorical_features)
     ])
 
-# Prepare the data for model training
+# Prepare data for model training
 X = full_data[features]
 y = full_data[target]
 
-# Split the data into training and testing sets
+# Split data into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Preprocess the features
+# Preprocess features
 X_train_preprocessed = preprocessor.fit_transform(X_train)
 X_test_preprocessed = preprocessor.transform(X_test)
 
-# Define the function to optimize
 def rf_evaluate(n_estimators, max_depth, min_samples_split, min_samples_leaf, max_features):
+    """
+    Evaluate the effectiveness of different Random Forest Regressor parameters to find the most optimal model features for the project.
+
+    Args:
+        n_estimators (int): 
+        max_depth (int):
+        min_samples_split (int):
+        min_samples_leaf (int):
+        max_features (int):
+
+    Returns:
+        mae : The mean absolute error of the selected parameters
+    """
+
     params = {
         'n_estimators': int(n_estimators),
         'max_depth': int(max_depth),
@@ -130,17 +142,38 @@ with open('best_model.pkl', 'wb') as f:
 with open('preprocessor.pkl', 'wb') as f:
     pickle.dump(preprocessor, f)
 
-# Define a function to preprocess input data
 def preprocess_input(input_data):
+    """
+    Process input data to prepare it for prediction by the model.
+
+    Args:
+        input_data (pd.DataFrame or np.ndarray): The raw input data that needs to be preprocessed.
+
+    Returns:
+        input_data_preprocessed (np.ndarray): The preprocessed input data, ready for prediction.
+
+    Raises:
+        ValueError: If the preprocessed input data does not match the expected input shape required by the model.
+    """
     input_data_preprocessed = preprocessor.transform(input_data)
     expected_input_shape = best_model.n_features_in_
     if input_data_preprocessed.shape[1] != expected_input_shape:
         raise ValueError(f"Expected input shape {expected_input_shape}, but got {input_data_preprocessed.shape[1]}")
     return input_data_preprocessed
 
-# Define a function to make predictions
 def make_prediction(year):
-    # Ensure year is up to and including 2024
+    """
+    Predict the total carbon emissions of a specified year using the pre-trained Random Forest Regressor model and historical data.
+
+    Args:
+        year (int): The user-inputted year to predict total carbon emissions for.
+
+    Returns:
+        float: The model predicted total carbon emissions value.
+
+    Raises:
+        ValueError: If the year is greater than 2024.
+    """
     if year > 2024:
         raise ValueError("Year must be up to and including 2024")
     
@@ -148,7 +181,6 @@ def make_prediction(year):
                 'product_emissions_MtCO2', 'flaring_emissions_MtCO2',
                 'venting_emissions_MtCO2', 'total_operational_emissions_MtCO2e']
     
-    # Load historical data
     full_data = pd.read_csv('data.csv')
     
     # Check if the year is within the range of historical data
@@ -180,24 +212,27 @@ def make_prediction(year):
     
     # Ensure the 'year' column is set correctly
     historical_data.loc[:, 'year'] = year
-    
-    # Ensure features are aligned with the training data
     historical_data = historical_data[features]
-    
-    # Preprocess the historical data using the same preprocessor
     input_data_preprocessed = preprocess_input(historical_data)
     
     # Make the prediction
     prediction = best_model.predict(input_data_preprocessed)
     
-    # Ensure prediction is a scalar value
     if isinstance(prediction, np.ndarray) and prediction.ndim > 1:
         return prediction[0][0]  # For a 2D array
     else:
         return prediction[0]
 
-# Convert a plot to a base64 string
 def plot_to_base64(fig):
+    """
+    Transform plot image to base64 for user output on prediction HTML page.
+
+    Args:
+        fig (matplotlib.figure.Figure): The image to be converted to base64.
+
+    Returns:
+        str: The base64 string for visualizing the plot.
+    """
     img = io.BytesIO()
     fig.savefig(img, format='png')
     img.seek(0)
@@ -206,12 +241,23 @@ def plot_to_base64(fig):
     return plot_url
 
 def emissions_comparison_plot(data, year, prediction):
-    # Create a directory for plots if it doesn't exist
+    """
+    Plot the model predicted value versus the actual value for webpage output.
+
+    Args:
+        data (pd.DataFrame): DataFrame containing historical data.
+        year (int): The user-inputted year to predict total carbon emissions for.
+        prediction (float): The predicted AI model's value for total carbon emissions of the specified year.
+
+    Returns:
+        tuple: A tuple containing:
+            - str: The base64 version of the plot for output on the prediction webpage.
+            - str: The path to the saved plot.
+    """
     plot_dir = 'static/plots'
     if not os.path.exists(plot_dir):
         os.makedirs(plot_dir)
     
-    # Define the path for the plot image
     plot_path = os.path.join(plot_dir, 'emissions_comparison_plot.png')
     
     # Create the plot
@@ -220,24 +266,17 @@ def emissions_comparison_plot(data, year, prediction):
     # Filter data for the specified year
     year_data = data[data['year'] == year]
     
-    # Plot actual emissions as a horizontal line
     actual_emission = year_data['total_emissions_MtCO2e'].values[0] if not year_data.empty else 0
     ax.axhline(y=actual_emission, color='b', linestyle='--', label=f'Actual Emissions for {year}')
-    
-    # Plot predicted emissions as a horizontal line
     ax.axhline(y=prediction, color='g', linestyle='--', label='Predicted Emissions')
     
     ax.set_xlabel('Year')
     ax.set_ylabel('Total Emissions (MtCO2e)')
     ax.set_title(f'Actual vs. Predicted Total Emissions for {year}')
-    
-    # Set the x-axis limits to show only the specified year
     ax.set_xlim(year - 1, year + 1)
     
-    # Add legend
     ax.legend()
     
-    # Save the plot to a file
     fig.savefig(plot_path)
     plt.close(fig)
     
@@ -245,10 +284,6 @@ def emissions_comparison_plot(data, year, prediction):
     plot_url = plot_to_base64(fig)
     
     return plot_url, plot_path
-
-
-
-
 
 def calculate_prediction_accuracy(prediction, actual_value):
     """
@@ -267,32 +302,38 @@ def calculate_prediction_accuracy(prediction, actual_value):
     accuracy = (1 - abs(prediction - actual_value) / abs(actual_value)) * 100
     return accuracy
 
-
-
-
-
-
-
-# Define a function to handle user input
 def handle_user_input(year, data):
+    """
+    Take user specified year for prediction and carry out steps for model to predict total carbon emissions for the specified year.
+    
+    Args:
+        year (int): The user-inputted year to predict total carbon emissions for.
+        data (pd.DataFrame): DataFrame containing historical data.
+
+    Returns:
+        tuple: A tuple containing:
+            - float: The predicted value of total carbon emissions by the model for the specified year.
+            - str or None: An error message if an exception occurs, otherwise None.
+            - str: The base64 version of the plot for output on the prediction webpage.
+            - float: The Mean Squared Error of the model prediction.
+            - float: The Mean Absolute Error of the model prediction.
+            - float: The R-Squared Error of the model prediction.
+            - float: The Root Mean Squared Error of the model prediction.
+            - float: The accuracy of the model prediction compared to the actual value in the historical data, output as a percentage.
+
+    Raises:
+        ValueError: If the year is greater than 2024.
+    """
     try:
-        # Ensure year is up to and including 2024
         if year > 2024:
             raise ValueError("Year must be up to and including 2024")
 
-        # Make prediction for the specified year
         prediction = make_prediction(year)
 
-        # Extract the actual value for the specified year from the dataset
         actual_value = data.loc[data['year'] == year, 'total_emissions_MtCO2e'].values[0]
-
-        # Calculate the accuracy of the prediction
         accuracy = calculate_prediction_accuracy(prediction, actual_value)
 
-        # Generate the plot
         plot_url, plot_path = emissions_comparison_plot(data, year, prediction)
-
-        # Preprocess the data for evaluation
         X_data_preprocessed = preprocess_input(data[features])
         
         # Evaluate model metrics
@@ -309,7 +350,7 @@ def handle_user_input(year, data):
 
 
 
-# Initialize the Flask app
+# Initialize the Flask app for webpage
 app = Flask(__name__)
 
 @app.route('/')
