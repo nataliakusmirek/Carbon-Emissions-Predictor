@@ -11,7 +11,7 @@ The dataset used in this project can be found on Kaggle: [Carbon Majors Emission
 - **data/**: Directory containing the dataset.
 - **static/**: Directory containing static files, including plots.
 - **templates/**: Directory containing HTML templates.
-- **myproject/**: Main project directory containing Django settings and configurations.
+- **(in master branch) myproject/**: Main project directory containing Django settings and configurations.
   - **myapp/**: Django application containing views, models, and other app-specific files.
     - **migrations/**: Directory containing database migrations.
     - **__init__.py**: Initialization file for the app.
